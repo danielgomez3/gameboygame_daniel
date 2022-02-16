@@ -1,0 +1,91 @@
+                                      1 ;--------------------------------------------------------
+                                      2 ; File Created by SDCC : free open source ANSI-C Compiler
+                                      3 ; Version 4.1.6 #12539 (Linux)
+                                      4 ;--------------------------------------------------------
+                                      5 	.module soundexample
+                                      6 	.optsdcc -mgbz80
+                                      7 	
+                                      8 ;--------------------------------------------------------
+                                      9 ; Public variables in this module
+                                     10 ;--------------------------------------------------------
+                                     11 	.globl _main
+                                     12 	.globl _joypad
+                                     13 	.globl _delay
+                                     14 ;--------------------------------------------------------
+                                     15 ; special function registers
+                                     16 ;--------------------------------------------------------
+                                     17 ;--------------------------------------------------------
+                                     18 ; ram data
+                                     19 ;--------------------------------------------------------
+                                     20 	.area _DATA
+                                     21 ;--------------------------------------------------------
+                                     22 ; ram data
+                                     23 ;--------------------------------------------------------
+                                     24 	.area _INITIALIZED
+                                     25 ;--------------------------------------------------------
+                                     26 ; absolute external ram data
+                                     27 ;--------------------------------------------------------
+                                     28 	.area _DABS (ABS)
+                                     29 ;--------------------------------------------------------
+                                     30 ; global & static initialisations
+                                     31 ;--------------------------------------------------------
+                                     32 	.area _HOME
+                                     33 	.area _GSINIT
+                                     34 	.area _GSFINAL
+                                     35 	.area _GSINIT
+                                     36 ;--------------------------------------------------------
+                                     37 ; Home
+                                     38 ;--------------------------------------------------------
+                                     39 	.area _HOME
+                                     40 	.area _HOME
+                                     41 ;--------------------------------------------------------
+                                     42 ; code
+                                     43 ;--------------------------------------------------------
+                                     44 	.area _CODE
+                                     45 ;./src/soundexample.c:4: void main(){
+                                     46 ;	---------------------------------
+                                     47 ; Function main
+                                     48 ; ---------------------------------
+      000000                         49 _main::
+                                     50 ;./src/soundexample.c:6: NR52_REG = 0x80; // this is 1000 0000 in binary and turns on the sound
+      000000 3E 80                   51 	ld	a, #0x80
+      000002 E0r00                   52 	ldh	(_NR52_REG + 0), a
+                                     53 ;./src/soundexample.c:7: NR51_REG = 0x77; // sets volume for left and right channel to max
+      000004 3E 77                   54 	ld	a, #0x77
+      000006 E0r00                   55 	ldh	(_NR51_REG + 0), a
+                                     56 ;./src/soundexample.c:8: NR50_REG = 0xFF; // this is 1111 1111 in binary, this reg selects which channels we want to use. rn We want all.  
+      000008 3E FF                   57 	ld	a, #0xff
+      00000A E0r00                   58 	ldh	(_NR50_REG + 0), a
+                                     59 ;./src/soundexample.c:10: while (1){
+      00000C                         60 00104$:
+                                     61 ;./src/soundexample.c:12: UBYTE joypad_state = joypad();
+      00000C CDr00r00                62 	call	_joypad
+      00000F 7B                      63 	ld	a, e
+                                     64 ;./src/soundexample.c:14: if(joypad_state) {
+      000010 B7                      65 	or	a, a
+      000011 28 F9                   66 	jr	Z, 00104$
+                                     67 ;./src/soundexample.c:20: NR10_REG = 0x16; //0001 0110
+      000013 3E 16                   68 	ld	a, #0x16
+      000015 E0r00                   69 	ldh	(_NR10_REG + 0), a
+                                     70 ;./src/soundexample.c:21: NR11_REG = 0x40;
+      000017 3E 40                   71 	ld	a, #0x40
+      000019 E0r00                   72 	ldh	(_NR11_REG + 0), a
+                                     73 ;./src/soundexample.c:22: NR12_REG = 0x73;
+      00001B 3E 73                   74 	ld	a, #0x73
+      00001D E0r00                   75 	ldh	(_NR12_REG + 0), a
+                                     76 ;./src/soundexample.c:23: NR13_REG = 0x00;
+      00001F AF                      77 	xor	a, a
+      000020 E0r00                   78 	ldh	(_NR13_REG + 0), a
+                                     79 ;./src/soundexample.c:24: NR14_REG = 0xC3;
+      000022 3E C3                   80 	ld	a, #0xc3
+      000024 E0r00                   81 	ldh	(_NR14_REG + 0), a
+                                     82 ;./src/soundexample.c:25: delay(1000);
+      000026 11 E8 03                83 	ld	de, #0x03e8
+      000029 D5                      84 	push	de
+      00002A CDr00r00                85 	call	_delay
+      00002D E1                      86 	pop	hl
+                                     87 ;./src/soundexample.c:28: }
+      00002E 18 DC                   88 	jr	00104$
+                                     89 	.area _CODE
+                                     90 	.area _INITIALIZER
+                                     91 	.area _CABS (ABS)

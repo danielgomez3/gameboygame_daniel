@@ -1,0 +1,11 @@
+CC = ./gameboy_dev/gbdk/bin/lcc
+CFLAGSCOMPILATION = -Wa-l -Wl-m -Wl-j -c -o-Wa-l -Wl-m -Wl-j -c -o #-o will be our output filename, set it to our bin folder
+CFLAGSLINKING = -Wa-l -Wl-m -Wl-j -o #-o will name our ROM
+OBJ = 
+
+all: {link}
+
+link: {compile}
+
+compile:
+	${CC} -Wa-l -Wl-m -Wl-j -c -o main.o main.c-Wa-l -Wl-m -Wl-j -c -o main.o main.c

@@ -1,7 +1,7 @@
 
 #include <gb/gb.h>
 #include <stdio.h>
-#include "/home/daniel/School/cse310/sprint3_cse310/01helloworld/sprites/nutty_animated.c"
+#include "nutty_animated.c"
 
 void main(){
 	UINT8 currentSpriteIndex = 0; //unsigned int, 8 bits 
