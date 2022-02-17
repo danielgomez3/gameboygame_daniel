@@ -2,90 +2,400 @@
                                       2 ; File Created by SDCC : free open source ANSI-C Compiler
                                       3 ; Version 4.1.6 #12539 (Linux)
                                       4 ;--------------------------------------------------------
-                                      5 	.module soundexample
+                                      5 	.module jumping
                                       6 	.optsdcc -mgbz80
                                       7 	
                                       8 ;--------------------------------------------------------
                                       9 ; Public variables in this module
                                      10 ;--------------------------------------------------------
                                      11 	.globl _main
-                                     12 	.globl _joypad
-                                     13 	.globl _delay
-                                     14 ;--------------------------------------------------------
-                                     15 ; special function registers
-                                     16 ;--------------------------------------------------------
-                                     17 ;--------------------------------------------------------
-                                     18 ; ram data
-                                     19 ;--------------------------------------------------------
-                                     20 	.area _DATA
-                                     21 ;--------------------------------------------------------
-                                     22 ; ram data
-                                     23 ;--------------------------------------------------------
-                                     24 	.area _INITIALIZED
-                                     25 ;--------------------------------------------------------
-                                     26 ; absolute external ram data
+                                     12 	.globl _jump
+                                     13 	.globl _wouldhitsurface
+                                     14 	.globl _performancedelay
+                                     15 	.globl _set_sprite_data
+                                     16 	.globl _wait_vbl_done
+                                     17 	.globl _joypad
+                                     18 	.globl _floorYposition
+                                     19 	.globl _gravity
+                                     20 	.globl _Nutmeg
+                                     21 	.globl _currentspeedY
+                                     22 	.globl _jumping
+                                     23 	.globl _playerlocation
+                                     24 ;--------------------------------------------------------
+                                     25 ; special function registers
+                                     26 ;--------------------------------------------------------
                                      27 ;--------------------------------------------------------
-                                     28 	.area _DABS (ABS)
+                                     28 ; ram data
                                      29 ;--------------------------------------------------------
-                                     30 ; global & static initialisations
-                                     31 ;--------------------------------------------------------
-                                     32 	.area _HOME
-                                     33 	.area _GSINIT
-                                     34 	.area _GSFINAL
-                                     35 	.area _GSINIT
-                                     36 ;--------------------------------------------------------
-                                     37 ; Home
-                                     38 ;--------------------------------------------------------
-                                     39 	.area _HOME
-                                     40 	.area _HOME
-                                     41 ;--------------------------------------------------------
-                                     42 ; code
-                                     43 ;--------------------------------------------------------
-                                     44 	.area _CODE
-                                     45 ;./src/soundexample.c:4: void main(){
-                                     46 ;	---------------------------------
-                                     47 ; Function main
-                                     48 ; ---------------------------------
-      000000                         49 _main::
-                                     50 ;./src/soundexample.c:6: NR52_REG = 0x80; // this is 1000 0000 in binary and turns on the sound
-      000000 3E 80                   51 	ld	a, #0x80
-      000002 E0r00                   52 	ldh	(_NR52_REG + 0), a
-                                     53 ;./src/soundexample.c:7: NR51_REG = 0x77; // sets volume for left and right channel to max
-      000004 3E 77                   54 	ld	a, #0x77
-      000006 E0r00                   55 	ldh	(_NR51_REG + 0), a
-                                     56 ;./src/soundexample.c:8: NR50_REG = 0xFF; // this is 1111 1111 in binary, this reg selects which channels we want to use. rn We want all.  
-      000008 3E FF                   57 	ld	a, #0xff
-      00000A E0r00                   58 	ldh	(_NR50_REG + 0), a
-                                     59 ;./src/soundexample.c:10: while (1){
-      00000C                         60 00104$:
-                                     61 ;./src/soundexample.c:12: UBYTE joypad_state = joypad();
-      00000C CDr00r00                62 	call	_joypad
-      00000F 7B                      63 	ld	a, e
-                                     64 ;./src/soundexample.c:14: if(joypad_state) {
-      000010 B7                      65 	or	a, a
-      000011 28 F9                   66 	jr	Z, 00104$
-                                     67 ;./src/soundexample.c:20: NR10_REG = 0x16; //0001 0110
-      000013 3E 16                   68 	ld	a, #0x16
-      000015 E0r00                   69 	ldh	(_NR10_REG + 0), a
-                                     70 ;./src/soundexample.c:21: NR11_REG = 0x40;
-      000017 3E 40                   71 	ld	a, #0x40
-      000019 E0r00                   72 	ldh	(_NR11_REG + 0), a
-                                     73 ;./src/soundexample.c:22: NR12_REG = 0x73;
-      00001B 3E 73                   74 	ld	a, #0x73
-      00001D E0r00                   75 	ldh	(_NR12_REG + 0), a
-                                     76 ;./src/soundexample.c:23: NR13_REG = 0x00;
-      00001F AF                      77 	xor	a, a
-      000020 E0r00                   78 	ldh	(_NR13_REG + 0), a
-                                     79 ;./src/soundexample.c:24: NR14_REG = 0xC3;
-      000022 3E C3                   80 	ld	a, #0xc3
-      000024 E0r00                   81 	ldh	(_NR14_REG + 0), a
-                                     82 ;./src/soundexample.c:25: delay(1000);
-      000026 11 E8 03                83 	ld	de, #0x03e8
-      000029 D5                      84 	push	de
-      00002A CDr00r00                85 	call	_delay
-      00002D E1                      86 	pop	hl
-                                     87 ;./src/soundexample.c:28: }
-      00002E 18 DC                   88 	jr	00104$
-                                     89 	.area _CODE
-                                     90 	.area _INITIALIZER
-                                     91 	.area _CABS (ABS)
+                                     30 	.area _DATA
+      000000                         31 _playerlocation::
+      000000                         32 	.ds 2
+      000002                         33 _jumping::
+      000002                         34 	.ds 1
+      000003                         35 _currentspeedY::
+      000003                         36 	.ds 1
+                                     37 ;--------------------------------------------------------
+                                     38 ; ram data
+                                     39 ;--------------------------------------------------------
+                                     40 	.area _INITIALIZED
+      000000                         41 _Nutmeg::
+      000000                         42 	.ds 32
+      000020                         43 _gravity::
+      000020                         44 	.ds 1
+      000021                         45 _floorYposition::
+      000021                         46 	.ds 1
+                                     47 ;--------------------------------------------------------
+                                     48 ; absolute external ram data
+                                     49 ;--------------------------------------------------------
+                                     50 	.area _DABS (ABS)
+                                     51 ;--------------------------------------------------------
+                                     52 ; global & static initialisations
+                                     53 ;--------------------------------------------------------
+                                     54 	.area _HOME
+                                     55 	.area _GSINIT
+                                     56 	.area _GSFINAL
+                                     57 	.area _GSINIT
+                                     58 ;--------------------------------------------------------
+                                     59 ; Home
+                                     60 ;--------------------------------------------------------
+                                     61 	.area _HOME
+                                     62 	.area _HOME
+                                     63 ;--------------------------------------------------------
+                                     64 ; code
+                                     65 ;--------------------------------------------------------
+                                     66 	.area _CODE
+                                     67 ;./src/jumping.c:18: void performancedelay(UINT8 numloops){
+                                     68 ;	---------------------------------
+                                     69 ; Function performancedelay
+                                     70 ; ---------------------------------
+      000000                         71 _performancedelay::
+                                     72 ;./src/jumping.c:20: for(i=0; i < numloops; i++) {
+      000000 0E 00                   73 	ld	c, #0x00
+      000002                         74 00103$:
+      000002 79                      75 	ld	a, c
+      000003 F8 02                   76 	ldhl	sp,	#2
+      000005 96                      77 	sub	a, (hl)
+      000006 D0                      78 	ret	NC
+                                     79 ;./src/jumping.c:21: wait_vbl_done();
+      000007 CDr00r00                80 	call	_wait_vbl_done
+                                     81 ;./src/jumping.c:20: for(i=0; i < numloops; i++) {
+      00000A 0C                      82 	inc	c
+                                     83 ;./src/jumping.c:25: }
+      00000B 18 F5                   84 	jr	00103$
+                                     85 ;./src/jumping.c:27: INT8 wouldhitsurface(UINT8 projectedYPosition){
+                                     86 ;	---------------------------------
+                                     87 ; Function wouldhitsurface
+                                     88 ; ---------------------------------
+      00000D                         89 _wouldhitsurface::
+                                     90 ;./src/jumping.c:28: if(projectedYPosition >= floorYposition){
+      00000D F8 02                   91 	ldhl	sp,	#2
+      00000F 7E                      92 	ld	a, (hl)
+      000010 21r21r00                93 	ld	hl, #_floorYposition
+      000013 96                      94 	sub	a, (hl)
+      000014 38 02                   95 	jr	C, 00102$
+                                     96 ;./src/jumping.c:29: return floorYposition;
+      000016 5E                      97 	ld	e, (hl)
+      000017 C9                      98 	ret
+      000018                         99 00102$:
+                                    100 ;./src/jumping.c:31: return -1; // else, do this!
+      000018 1E FF                  101 	ld	e, #0xff
+                                    102 ;./src/jumping.c:32: }
+      00001A C9                     103 	ret
+                                    104 ;./src/jumping.c:36: void jump(UINT8 spriteid, UINT8 spritelocation[2]){
+                                    105 ;	---------------------------------
+                                    106 ; Function jump
+                                    107 ; ---------------------------------
+      00001B                        108 _jump::
+      00001B E8 FA                  109 	add	sp, #-6
+                                    110 ;./src/jumping.c:40: NR10_REG = 0x16; //0001 0110
+      00001D 3E 16                  111 	ld	a, #0x16
+      00001F E0r00                  112 	ldh	(_NR10_REG + 0), a
+                                    113 ;./src/jumping.c:41: NR11_REG = 0x40;
+      000021 3E 40                  114 	ld	a, #0x40
+      000023 E0r00                  115 	ldh	(_NR11_REG + 0), a
+                                    116 ;./src/jumping.c:42: NR12_REG = 0x73;
+      000025 3E 73                  117 	ld	a, #0x73
+      000027 E0r00                  118 	ldh	(_NR12_REG + 0), a
+                                    119 ;./src/jumping.c:43: NR13_REG = 0x00;
+      000029 AF                     120 	xor	a, a
+      00002A E0r00                  121 	ldh	(_NR13_REG + 0), a
+                                    122 ;./src/jumping.c:44: NR14_REG = 0xC3;
+      00002C 3E C3                  123 	ld	a, #0xc3
+      00002E E0r00                  124 	ldh	(_NR14_REG + 0), a
+                                    125 ;./src/jumping.c:47: if(jumping==0){
+      000030 21r02r00               126 	ld	hl, #_jumping
+      000033 7E                     127 	ld	a, (hl)
+      000034 B7                     128 	or	a, a
+      000035 20 07                  129 	jr	NZ, 00102$
+                                    130 ;./src/jumping.c:48: jumping=1;
+      000037 36 01                  131 	ld	(hl), #0x01
+                                    132 ;./src/jumping.c:49: currentspeedY = 10;
+      000039 21r03r00               133 	ld	hl, #_currentspeedY
+      00003C 36 0A                  134 	ld	(hl), #0x0a
+      00003E                        135 00102$:
+                                    136 ;./src/jumping.c:52: currentspeedY = currentspeedY + gravity;
+      00003E FAr03r00               137 	ld	a, (#_currentspeedY)
+      000041 21r20r00               138 	ld	hl, #_gravity
+      000044 86                     139 	add	a, (hl)
+      000045 EAr03r00               140 	ld	(#_currentspeedY),a
+                                    141 ;./src/jumping.c:55: spritelocation[1] = spritelocation[1] - currentspeedY; 
+      000048 F8 09                  142 	ldhl	sp,#9
+      00004A 2A                     143 	ld	a, (hl+)
+      00004B 5F                     144 	ld	e, a
+      00004C 56                     145 	ld	d, (hl)
+      00004D 6B                     146 	ld	l, e
+      00004E 62                     147 	ld	h, d
+      00004F 23                     148 	inc	hl
+      000050 33                     149 	inc	sp
+      000051 33                     150 	inc	sp
+      000052 5D                     151 	ld	e, l
+      000053 54                     152 	ld	d, h
+      000054 D5                     153 	push	de
+      000055 1A                     154 	ld	a, (de)
+      000056 21r03r00               155 	ld	hl, #_currentspeedY
+      000059 96                     156 	sub	a, (hl)
+      00005A 47                     157 	ld	b, a
+      00005B E1                     158 	pop	hl
+      00005C E5                     159 	push	hl
+      00005D 70                     160 	ld	(hl), b
+                                    161 ;./src/jumping.c:59: possiblesurfaceY = wouldhitsurface(spritelocation[1]); 
+      00005E C5                     162 	push	bc
+      00005F 33                     163 	inc	sp
+      000060 CDr0Dr00               164 	call	_wouldhitsurface
+      000063 33                     165 	inc	sp
+      000064 F8 05                  166 	ldhl	sp,	#5
+      000066 73                     167 	ld	(hl), e
+                                    168 ;./src/jumping.c:65: move_sprite(0,spritelocation[0],possiblesurfaceY);
+      000067 F8 09                  169 	ldhl	sp,	#9
+      000069 7E                     170 	ld	a, (hl)
+      00006A F8 02                  171 	ldhl	sp,	#2
+      00006C 77                     172 	ld	(hl), a
+      00006D F8 0A                  173 	ldhl	sp,	#10
+      00006F 7E                     174 	ld	a, (hl)
+      000070 F8 03                  175 	ldhl	sp,	#3
+                                    176 ;./src/jumping.c:63: if(possiblesurfaceY > -1){
+      000072 22                     177 	ld	(hl+), a
+      000073 23                     178 	inc	hl
+      000074 5E                     179 	ld	e, (hl)
+      000075 3E FF                  180 	ld	a,#0xff
+      000077 57                     181 	ld	d,a
+      000078 96                     182 	sub	a, (hl)
+      000079 CB 7B                  183 	bit	7, e
+      00007B 28 07                  184 	jr	Z, 00120$
+      00007D CB 7A                  185 	bit	7, d
+      00007F 20 08                  186 	jr	NZ, 00121$
+      000081 BF                     187 	cp	a, a
+      000082 18 05                  188 	jr	00121$
+      000084                        189 00120$:
+      000084 CB 7A                  190 	bit	7, d
+      000086 28 01                  191 	jr	Z, 00121$
+      000088 37                     192 	scf
+      000089                        193 00121$:
+      000089 30 18                  194 	jr	NC, 00104$
+                                    195 ;./src/jumping.c:64: jumping = 0;
+      00008B 21r02r00               196 	ld	hl, #_jumping
+      00008E 36 00                  197 	ld	(hl), #0x00
+                                    198 ;./src/jumping.c:65: move_sprite(0,spritelocation[0],possiblesurfaceY);
+      000090 F8 02                  199 	ldhl	sp,#2
+      000092 2A                     200 	ld	a, (hl+)
+      000093 5F                     201 	ld	e, a
+                                    202 ;./developmentapps_gameboy/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
+                                    203 ;./developmentapps_gameboy/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
+      000094 2A                     204 	ld	a, (hl+)
+      000095 23                     205 	inc	hl
+      000096 57                     206 	ld	d, a
+      000097 1A                     207 	ld	a, (de)
+      000098 4F                     208 	ld	c, a
+      000099 11r00r00               209 	ld	de, #_shadow_OAM+0
+      00009C 7E                     210 	ld	a, (hl)
+      00009D 12                     211 	ld	(de), a
+      00009E 13                     212 	inc	de
+      00009F 79                     213 	ld	a, c
+      0000A0 12                     214 	ld	(de), a
+                                    215 ;./src/jumping.c:65: move_sprite(0,spritelocation[0],possiblesurfaceY);
+      0000A1 18 16                  216 	jr	00108$
+      0000A3                        217 00104$:
+                                    218 ;./src/jumping.c:69: move_sprite(0,spritelocation[0],spritelocation[1]);
+      0000A3 D1                     219 	pop	de
+      0000A4 D5                     220 	push	de
+      0000A5 1A                     221 	ld	a, (de)
+      0000A6 F8 04                  222 	ldhl	sp,	#4
+      0000A8 32                     223 	ld	(hl-), a
+      0000A9 2B                     224 	dec	hl
+      0000AA 2A                     225 	ld	a, (hl+)
+      0000AB 5F                     226 	ld	e, a
+      0000AC 2A                     227 	ld	a, (hl+)
+      0000AD 23                     228 	inc	hl
+      0000AE 57                     229 	ld	d, a
+      0000AF 1A                     230 	ld	a, (de)
+                                    231 ;./developmentapps_gameboy/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
+                                    232 ;./developmentapps_gameboy/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
+      0000B0 32                     233 	ld	(hl-), a
+      0000B1 01r00r00               234 	ld	bc, #_shadow_OAM
+      0000B4 2A                     235 	ld	a, (hl+)
+      0000B5 02                     236 	ld	(bc), a
+      0000B6 03                     237 	inc	bc
+      0000B7 7E                     238 	ld	a, (hl)
+      0000B8 02                     239 	ld	(bc), a
+                                    240 ;./src/jumping.c:69: move_sprite(0,spritelocation[0],spritelocation[1]);
+      0000B9                        241 00108$:
+                                    242 ;./src/jumping.c:71: }
+      0000B9 E8 06                  243 	add	sp, #6
+      0000BB C9                     244 	ret
+                                    245 ;./src/jumping.c:73: void main() {
+                                    246 ;	---------------------------------
+                                    247 ; Function main
+                                    248 ; ---------------------------------
+      0000BC                        249 _main::
+                                    250 ;./src/jumping.c:74: set_sprite_data(0,2,Nutmeg); //display sprite data
+      0000BC 11r00r00               251 	ld	de, #_Nutmeg
+      0000BF D5                     252 	push	de
+      0000C0 3E 02                  253 	ld	a, #0x02
+      0000C2 F5                     254 	push	af
+      0000C3 33                     255 	inc	sp
+      0000C4 AF                     256 	xor	a, a
+      0000C5 F5                     257 	push	af
+      0000C6 33                     258 	inc	sp
+      0000C7 CDr00r00               259 	call	_set_sprite_data
+      0000CA E8 04                  260 	add	sp, #4
+                                    261 ;./developmentapps_gameboy/gbdk/include/gb/gb.h:1447: shadow_OAM[nb].tile=tile;
+      0000CC 21r02r00               262 	ld	hl, #(_shadow_OAM + 2)
+      0000CF 36 00                  263 	ld	(hl), #0x00
+                                    264 ;./src/jumping.c:79: playerlocation[0] = 10; //x coord
+      0000D1 21r00r00               265 	ld	hl, #_playerlocation
+      0000D4 36 0A                  266 	ld	(hl), #0x0a
+                                    267 ;./src/jumping.c:80: playerlocation[1] = floorYposition; //y coord
+      0000D6 11r01r00               268 	ld	de, #(_playerlocation + 1)
+      0000D9 FAr21r00               269 	ld	a, (#_floorYposition)
+      0000DC 12                     270 	ld	(de), a
+                                    271 ;./src/jumping.c:81: jumping = 0; 
+      0000DD 21r02r00               272 	ld	hl, #_jumping
+      0000E0 36 00                  273 	ld	(hl), #0x00
+                                    274 ;./src/jumping.c:83: move_sprite(0,playerlocation[0],playerlocation[1]);
+      0000E2 21r01r00               275 	ld	hl, #(_playerlocation + 1)
+      0000E5 46                     276 	ld	b, (hl)
+      0000E6 21r00r00               277 	ld	hl, #_playerlocation
+      0000E9 4E                     278 	ld	c, (hl)
+                                    279 ;./developmentapps_gameboy/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
+      0000EA 21r00r00               280 	ld	hl, #_shadow_OAM
+                                    281 ;./developmentapps_gameboy/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
+      0000ED 78                     282 	ld	a, b
+      0000EE 22                     283 	ld	(hl+), a
+      0000EF 71                     284 	ld	(hl), c
+                                    285 ;./src/jumping.c:85: DISPLAY_ON;
+      0000F0 F0r00                  286 	ldh	a, (_LCDC_REG + 0)
+      0000F2 F6 80                  287 	or	a, #0x80
+      0000F4 E0r00                  288 	ldh	(_LCDC_REG + 0), a
+                                    289 ;./src/jumping.c:86: SHOW_SPRITES;
+      0000F6 F0r00                  290 	ldh	a, (_LCDC_REG + 0)
+      0000F8 F6 02                  291 	or	a, #0x02
+      0000FA E0r00                  292 	ldh	(_LCDC_REG + 0), a
+                                    293 ;./src/jumping.c:88: while(1){
+      0000FC                        294 00109$:
+                                    295 ;./src/jumping.c:89: if((joypad() & J_A) || (jumping == 1)){
+      0000FC CDr00r00               296 	call	_joypad
+      0000FF CB 63                  297 	bit	4, e
+      000101 20 06                  298 	jr	NZ, 00101$
+      000103 FAr02r00               299 	ld	a, (#_jumping)
+      000106 3D                     300 	dec	a
+      000107 20 0C                  301 	jr	NZ, 00102$
+      000109                        302 00101$:
+                                    303 ;./src/jumping.c:90: jump(0,playerlocation);
+      000109 11r00r00               304 	ld	de, #_playerlocation
+      00010C D5                     305 	push	de
+      00010D AF                     306 	xor	a, a
+      00010E F5                     307 	push	af
+      00010F 33                     308 	inc	sp
+      000110 CDr1Br00               309 	call	_jump
+      000113 E8 03                  310 	add	sp, #3
+      000115                        311 00102$:
+                                    312 ;./src/jumping.c:92: if(joypad() & J_LEFT){
+      000115 CDr00r00               313 	call	_joypad
+      000118 CB 4B                  314 	bit	1, e
+      00011A 28 13                  315 	jr	Z, 00105$
+                                    316 ;./src/jumping.c:93: playerlocation[0] = playerlocation[0] - 2; //grab the x pos, change it 2 to the left
+      00011C FAr00r00               317 	ld	a, (#_playerlocation + 0)
+      00011F 3D                     318 	dec	a
+      000120 3D                     319 	dec	a
+      000121 EAr00r00               320 	ld	(#_playerlocation),a
+                                    321 ;./src/jumping.c:94: move_sprite(0,playerlocation[0],playerlocation[1]); }
+      000124 21r01r00               322 	ld	hl, #(_playerlocation + 1)
+      000127 46                     323 	ld	b, (hl)
+      000128 4F                     324 	ld	c, a
+                                    325 ;./developmentapps_gameboy/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
+      000129 21r00r00               326 	ld	hl, #_shadow_OAM
+                                    327 ;./developmentapps_gameboy/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
+      00012C 78                     328 	ld	a, b
+      00012D 22                     329 	ld	(hl+), a
+      00012E 71                     330 	ld	(hl), c
+                                    331 ;./src/jumping.c:94: move_sprite(0,playerlocation[0],playerlocation[1]); }
+      00012F                        332 00105$:
+                                    333 ;./src/jumping.c:95: if(joypad() & J_RIGHT){
+      00012F CDr00r00               334 	call	_joypad
+      000132 7B                     335 	ld	a, e
+      000133 0F                     336 	rrca
+      000134 30 13                  337 	jr	NC, 00107$
+                                    338 ;./src/jumping.c:96: playerlocation[0] = playerlocation[0] + 2; //move his x coord, change it 2 to the right
+      000136 FAr00r00               339 	ld	a, (#_playerlocation + 0)
+      000139 C6 02                  340 	add	a, #0x02
+      00013B EAr00r00               341 	ld	(#_playerlocation),a
+                                    342 ;./src/jumping.c:97: move_sprite(0,playerlocation[0],playerlocation[1]); //actually change his position through the game engine 
+      00013E 21r01r00               343 	ld	hl, #(_playerlocation + 1)
+      000141 4E                     344 	ld	c, (hl)
+      000142 47                     345 	ld	b, a
+                                    346 ;./developmentapps_gameboy/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
+      000143 21r00r00               347 	ld	hl, #_shadow_OAM
+                                    348 ;./developmentapps_gameboy/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
+      000146 79                     349 	ld	a, c
+      000147 22                     350 	ld	(hl+), a
+      000148 70                     351 	ld	(hl), b
+                                    352 ;./src/jumping.c:97: move_sprite(0,playerlocation[0],playerlocation[1]); //actually change his position through the game engine 
+      000149                        353 00107$:
+                                    354 ;./src/jumping.c:100: performancedelay(5);
+      000149 3E 05                  355 	ld	a, #0x05
+      00014B F5                     356 	push	af
+      00014C 33                     357 	inc	sp
+      00014D CDr00r00               358 	call	_performancedelay
+      000150 33                     359 	inc	sp
+                                    360 ;./src/jumping.c:102: }
+      000151 18 A9                  361 	jr	00109$
+                                    362 	.area _CODE
+                                    363 	.area _INITIALIZER
+      000000                        364 __xinit__Nutmeg:
+      000000 00                     365 	.db #0x00	; 0
+      000001 00                     366 	.db #0x00	; 0
+      000002 80                     367 	.db #0x80	; 128
+      000003 80                     368 	.db #0x80	; 128
+      000004 05                     369 	.db #0x05	; 5
+      000005 45                     370 	.db #0x45	; 69	'E'
+      000006 47                     371 	.db #0x47	; 71	'G'
+      000007 47                     372 	.db #0x47	; 71	'G'
+      000008 3F                     373 	.db #0x3f	; 63
+      000009 3F                     374 	.db #0x3f	; 63
+      00000A 2A                     375 	.db #0x2a	; 42
+      00000B 3E                     376 	.db #0x3e	; 62
+      00000C 5C                     377 	.db #0x5c	; 92
+      00000D 7C                     378 	.db #0x7c	; 124
+      00000E 42                     379 	.db #0x42	; 66	'B'
+      00000F 42                     380 	.db #0x42	; 66	'B'
+      000010 05                     381 	.db #0x05	; 5
+      000011 05                     382 	.db #0x05	; 5
+      000012 07                     383 	.db #0x07	; 7
+      000013 07                     384 	.db #0x07	; 7
+      000014 07                     385 	.db #0x07	; 7
+      000015 07                     386 	.db #0x07	; 7
+      000016 2E                     387 	.db #0x2e	; 46
+      000017 6E                     388 	.db #0x6e	; 110	'n'
+      000018 99                     389 	.db #0x99	; 153
+      000019 9D                     390 	.db #0x9d	; 157
+      00001A 3C                     391 	.db #0x3c	; 60
+      00001B 2C                     392 	.db #0x2c	; 44
+      00001C 44                     393 	.db #0x44	; 68	'D'
+      00001D 44                     394 	.db #0x44	; 68	'D'
+      00001E 00                     395 	.db #0x00	; 0
+      00001F 00                     396 	.db #0x00	; 0
+      000020                        397 __xinit__gravity:
+      000020 FE                     398 	.db #0xfe	; 254
+      000021                        399 __xinit__floorYposition:
+      000021 64                     400 	.db #0x64	; 100	'd'
+                                    401 	.area _CABS (ABS)
