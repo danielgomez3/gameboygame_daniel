@@ -5,9 +5,14 @@ OBJS = ./bin/*.o	# These files will need linking
 OBJDIR = ./bin
 TARGET = ./src/metasprites.c	# This is my program!
 
-all: $(OBJDIR)
+main: $(OBJDIR)
 	${CC} -Wa-l -Wl-m -Wl-j -c -o ./bin/main.o ${TARGET}
 	${CC} -Wa-l -Wl-m -Wl-j -o ./bin/main.gb ./bin/main.o
 
 clean:
 	$(RM) $(OBJS)
+
+sound: $(OBJDIR)
+	${CC} -Wa-l -Wl-m -Wl-j -c -o 
+	${CC} -Wa-l -Wl-m -Wl-j -o ./bin/sound.gb ./bin/sound.o
+	
